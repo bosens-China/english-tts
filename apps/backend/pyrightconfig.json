@@ -1,0 +1,27 @@
+{
+  "include": [
+    "app"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/.*/**",
+    "**/node_modules",
+    ".venv",
+    "data",
+    "dist",
+    "build"
+  ],
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Linux",
+  "typeCheckingMode": "basic",
+  "useLibraryCodeForTypes": true,
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportOptionalSubscript": false,
+  "reportOptionalMemberAccess": false,
+  "reportOptionalCall": false,
+  "reportOptionalIterable": false,
+  "reportOptionalContextManager": false,
+  "reportOptionalOperand": false,
+  "reportTypedDictNotRequiredAccess": false
+}

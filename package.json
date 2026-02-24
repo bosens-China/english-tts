@@ -1,0 +1,34 @@
+{
+  "name": "english-tts",
+  "private": true,
+  "scripts": {
+    "dev:db": "docker compose -f apps/backend/docker-compose.yml up -d",
+    "dev:backend": "cd apps/backend && uv run uvicorn app.main:app --reload",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev": "pnpm dev:db && sleep 2 && pnpm dev:backend & pnpm dev:frontend",
+    "build:frontend": "pnpm --filter frontend build",
+    "preview:frontend": "pnpm --filter frontend preview",
+    "stop:db": "docker compose -f apps/backend/docker-compose.yml down",
+    "lint:backend": "cd apps/backend && uv run ruff check app",
+    "lint:backend:fix": "cd apps/backend && uv run ruff check --fix app",
+    "format:backend": "cd apps/backend && uv run ruff format app",
+    "typecheck:backend": "cd apps/backend && uv run pyright",
+    "check:backend": "pnpm lint:backend && pnpm typecheck:backend",
+    "fix:backend": "pnpm lint:backend:fix && pnpm format:backend",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  },
+  "lint-staged": {
+    "apps/backend/**/*.py": [
+      "cd apps/backend && uv run ruff check --fix",
+      "cd apps/backend && uv run ruff format",
+      "cd apps/backend && uv run pyright"
+    ],
+    "apps/frontend/**/*.{ts,vue}": [
+      "cd apps/frontend && vue-tsc --noEmit"
+    ]
+  }
+}

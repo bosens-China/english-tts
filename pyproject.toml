@@ -1,0 +1,9 @@
+[project]
+name = "english-tts"
+version = "0.1.0"
+description = "英文对话语音合成 Monorepo"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.uv.workspace]
+members = ["apps/backend"]
