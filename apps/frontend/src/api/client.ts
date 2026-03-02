@@ -11,6 +11,14 @@ import type {
   CreateNoteData,
   UpdateAudioData,
 } from '@/lib/schemas'
+import type { LoginResponse, UserProfile } from '@/types/auth'
+import type {
+  ChatMessage,
+  EvaluateQAResponse,
+  GenerateLessonResponse,
+  PronunciationAssessmentResponse,
+} from '@/types/ai'
+import type { ReviewTask } from '@/types/review'
 
 // ==================== Book API ====================
 export const booksApi = {
@@ -56,6 +64,53 @@ export const lessonsApi = {
 }
 
 const API_BASE = '/api'
+
+// ==================== Auth API ====================
+export const authApi = {
+  login: (data: { username: string; password: string }) => fetchApi<LoginResponse>('/auth/login', {
+    method: 'POST',
+    body: data,
+  }),
+  me: () => fetchApi<UserProfile>('/auth/me'),
+}
+
+// ==================== AI API ====================
+export const aiApi = {
+  generateLesson: (data: { level: number; goal: string }) =>
+    fetchApi<GenerateLessonResponse>('/ai/generate-lesson', {
+      method: 'POST',
+      body: data,
+    }),
+  evaluateQA: (data: { lesson_text: string; question: string; user_answer: string }) =>
+    fetchApi<EvaluateQAResponse>('/ai/evaluate-qa', {
+      method: 'POST',
+      body: data,
+    }),
+  evaluatePronunciation: (data: { reference_text: string; spoken_text: string }) =>
+    fetchApi<PronunciationAssessmentResponse>('/ai/evaluate-pronunciation', {
+      method: 'POST',
+      body: data,
+    }),
+  tutorChat: (data: { context: string; message: string; history: ChatMessage[]; stream?: boolean }) =>
+    fetchApi<{ answer: string }>('/ai/tutor-chat', {
+      method: 'POST',
+      body: data,
+    }),
+}
+
+// ==================== Review API ====================
+export const reviewApi = {
+  list: (dueOnly = false) => fetchApi<ReviewTask[]>(`/reviews${dueOnly ? '?due_only=true' : ''}`),
+  create: (data: { text: string; lesson_key?: string }) =>
+    fetchApi<ReviewTask>('/reviews', {
+      method: 'POST',
+      body: data,
+    }),
+  pass: (taskId: string) =>
+    fetchApi<ReviewTask>(`/reviews/${taskId}/pass`, {
+      method: 'POST',
+    }),
+}
 
 // ==================== Note API ====================
 export const notesApi = {

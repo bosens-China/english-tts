@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import FloatingTutor from '@/components/ai/FloatingTutor.vue'
+</script>
+
 <template>
   <div class="antialiased text-neutral-900 dark:text-neutral-100">
     <RouterView v-slot="{ Component }">
@@ -13,6 +17,7 @@
       :rich-colors="true"
       :close-button="true"
     />
+    <FloatingTutor />
   </div>
 </template>
 

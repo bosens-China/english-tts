@@ -2,12 +2,19 @@ import { ofetch, type FetchOptions } from 'ofetch'
 import { toast } from 'vue-sonner'
 
 const API_BASE = '/api'
+const TOKEN_KEY = 'english-tts-token-v1'
 
 // 创建 ofetch 实例
 export const http = ofetch.create({
   baseURL: API_BASE,
-  headers: {
-    'Content-Type': 'application/json',
+  headers: { 'Content-Type': 'application/json' },
+  async onRequest({ options }) {
+    if (typeof window === 'undefined') return
+    const token = window.localStorage.getItem(TOKEN_KEY)
+    if (!token) return
+    const headers = new Headers(options.headers as HeadersInit)
+    headers.set('Authorization', `Bearer ${token}`)
+    options.headers = headers
   },
   async onRequestError({ error }) {
     console.error('Request error:', error)
@@ -26,6 +33,16 @@ export const http = ofetch.create({
         break
       case 422:
         toast.error(`数据验证失败: ${message}`)
+        break
+      case 401:
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(TOKEN_KEY)
+          window.localStorage.removeItem('english-tts-user-v1')
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login'
+          }
+        }
+        toast.error('登录状态已失效，请重新登录')
         break
       case 500:
         toast.error('服务器错误，请稍后重试')

@@ -8,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -196,3 +197,40 @@ class Audio(Base):
         if include_dialogue:
             data["dialogue"] = self.dialogue
         return data
+
+
+class ReviewTask(Base):
+    """复习任务模型 - 按用户维度存储遗忘曲线任务"""
+
+    __tablename__ = "review_tasks"
+    __table_args__ = (UniqueConstraint("user_id", "lesson_key", name="uq_review_user_lesson"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    lesson_key: Mapped[str] = mapped_column(String(120), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    stage: Mapped[int] = mapped_column(nullable=False, default=0)
+    next_review_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "lesson_key": self.lesson_key,
+            "text": self.text,
+            "stage": self.stage,
+            "next_review_at": self.next_review_at.isoformat() if self.next_review_at else None,
+            "last_reviewed_at": self.last_reviewed_at.isoformat() if self.last_reviewed_at else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

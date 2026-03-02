@@ -5,6 +5,26 @@ import re
 from pydantic import BaseModel, Field, field_validator
 
 
+# ==================== Auth ====================
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=100, description="测试账号用户名")
+    password: str = Field(..., min_length=1, max_length=100, description="测试账号密码")
+
+
+class UserProfile(BaseModel):
+    id: str
+    username: str
+    display_name: str
+    membership: str
+    level: int
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserProfile
+
+
 # ==================== Book ====================
 class BookCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255, description="书名")
@@ -152,6 +172,78 @@ class NoteResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ==================== AI / LLM ====================
+class GenerateLessonRequest(BaseModel):
+    level: int = Field(..., ge=0, le=5, description="用户当前等级，0 为零基础")
+    goal: str = Field(default="daily", min_length=1, max_length=30, description="学习目标")
+
+
+class GenerateLessonResponse(BaseModel):
+    text: str
+    audio_script: list[DialogueLine]
+    new_words: list[str]
+    grammar: list[str]
+    culture_notes: list[str]
+    questions: list[str]
+
+
+class EvaluateQARequest(BaseModel):
+    lesson_text: str = Field(..., min_length=1, max_length=10000)
+    question: str = Field(..., min_length=1, max_length=1000)
+    user_answer: str = Field(..., min_length=1, max_length=5000)
+
+
+class EvaluateQAResponse(BaseModel):
+    score: int = Field(..., ge=0, le=100)
+    passed: bool
+    feedback: str
+
+
+class PronunciationAssessmentRequest(BaseModel):
+    reference_text: str = Field(..., min_length=1, max_length=10000)
+    spoken_text: str = Field(..., min_length=1, max_length=10000)
+
+
+class PronunciationAssessmentResponse(BaseModel):
+    score: int = Field(..., ge=0, le=100)
+    passed: bool
+    accuracy: float = Field(..., ge=0, le=1)
+    feedback: str
+
+
+class ChatMessage(BaseModel):
+    role: str = Field(..., pattern="^(system|user|assistant)$")
+    content: str = Field(..., min_length=1, max_length=5000)
+
+
+class AITutorChatRequest(BaseModel):
+    context: str = Field(default="", max_length=10000)
+    message: str = Field(..., min_length=1, max_length=5000)
+    history: list[ChatMessage] = Field(default_factory=list, max_length=20)
+    stream: bool = Field(default=False, description="是否流式返回")
+
+
+class AITutorChatResponse(BaseModel):
+    answer: str
+
+
+class ReviewTaskCreateRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=10000)
+    lesson_key: str | None = Field(default=None, min_length=1, max_length=120)
+
+
+class ReviewTaskResponse(BaseModel):
+    id: str
+    user_id: str
+    lesson_key: str
+    text: str
+    stage: int
+    next_review_at: str | None
+    last_reviewed_at: str | None
+    created_at: str
+    updated_at: str
 
 
 # 旧的 Audio schemas 已删除，现在 Audio 作为 Lesson 的子资源

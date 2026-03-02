@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from app.cache import cache
 from app.database import init_db
-from app.routers import books, lessons, notes, tts
+from app.routers import ai, auth, books, lessons, notes, reviews, tts
 
 
 @asynccontextmanager
@@ -51,6 +51,9 @@ app.include_router(books.router)
 app.include_router(lessons.router)
 app.include_router(notes.router)
 app.include_router(tts.router)
+app.include_router(auth.router)
+app.include_router(ai.router)
+app.include_router(reviews.router)
 
 
 @app.get("/")
@@ -65,6 +68,9 @@ async def root():
             "lessons": "/lessons",
             "notes": "/notes",
             "tts": "/tts",
+            "auth": "/auth",
+            "ai": "/ai",
+            "reviews": "/reviews",
         },
     }
 
